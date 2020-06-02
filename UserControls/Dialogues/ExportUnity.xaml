@@ -1,0 +1,41 @@
+﻿<Window x:Class="CV.UserControls.Dialogues.ExportUnity"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CV.UserControls.Dialogues"
+        xmlns:controls="clr-namespace:CV.UserControls"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Title="Export to Unity" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Window.Resources>
+        <system:String x:Key="empty">CameraMode</system:String>
+    </Window.Resources>
+
+    <StackPanel Margin="15">
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+            <TextBlock Name="path_ExportUnity" Background="LightGray" Text="{Binding Path=Path}" VerticalAlignment="Bottom" ToolTip="{Binding ElementName=path_ExportUnity, Path=Text}" Width="175" FontSize="16"/>
+            <Button Content="Browse" Padding="5,0,5,0" MinWidth="100" Margin="10,0,0,0" Click="Browser_Handler"/>
+        </StackPanel>
+
+        <Border Background="LightGray" CornerRadius="3" Margin="0,0,0,15">
+            <TreeView Name="cameraModes_ExportUnity" Background="Transparent" MaxHeight="100"  SelectedItemChanged="SelectedItem_Handler">
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="TreeViewItem">
+                        <Setter Property="IsExpanded" Value="True"/>
+                    </Style>
+                </TreeView.ItemContainerStyle>
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate DataType="CameraMode_Items" ItemsSource="{Binding ChildCameras}">
+                        <DockPanel>
+                            <controls:CVCheckBox DockPanel.Dock="Left" VerticalAlignment="Center" IsChecked="{Binding Included}" Margin="0,0,5,0"/>
+                            <TextBlock DockPanel.Dock="Left" Name="modeName_ExportUnity" Text="{Binding Mode}" FontSize="14" FontWeight="Bold" Padding="3"/>
+                        </DockPanel>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+        </Border>
+
+        <Button Content="Export" Padding="5" Click="ConfirmExport_Handler"/>
+    </StackPanel>
+</Window>

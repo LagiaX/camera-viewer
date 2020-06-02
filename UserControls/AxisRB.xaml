@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="CV.UserControls.AxisRB"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CV.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="40" d:DesignWidth="90">
+    <Grid Name="mainGrid_AxisRB">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="30"/>
+            <ColumnDefinition Width="30"/>
+            <ColumnDefinition Width="30"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="16"/>
+            <RowDefinition Height="22"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="x" HorizontalAlignment="Center"/>
+        <RadioButton Grid.Row="1" Grid.Column="0" Name="x_AxisRB" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+        <TextBlock Grid.Row="0" Grid.Column="1" Text="y" HorizontalAlignment="Center"/>
+        <RadioButton Grid.Row="1" Grid.Column="1" Name="y_AxisRB" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+        <TextBlock Grid.Row="0" Grid.Column="2" Text="z" HorizontalAlignment="Center"/>
+        <RadioButton Grid.Row="1" Grid.Column="2" Name="z_AxisRB" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Grid>
+</UserControl>

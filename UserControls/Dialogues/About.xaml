@@ -1,0 +1,21 @@
+﻿<Window x:Class="CV.UserControls.Dialogues.About"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CV.UserControls.Dialogues"
+        mc:Ignorable="d"
+        Title="About CameraViewer" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Window.Resources>
+        
+    </Window.Resources>
+    <Border BorderBrush="Beige" BorderThickness="1" Margin="20" Width="300">
+        <DockPanel Background="Snow">
+            <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap">CameraViewer is a desktop application specifically designed to experiment with camera movement and behavior in a 3D environment.</TextBlock>
+            <Image DockPanel.Dock="Top" Source="/Resources/Img/cameraViewerIcon.png" Height="90" Margin="10"/>
+            <TextBlock DockPanel.Dock="Top">Author: Germán Cabeza de Vaca Román<LineBreak/>2019</TextBlock>
+            <TextBlock DockPanel.Dock="Top" Foreground="LimeGreen">Version 1.0.0</TextBlock>
+        </DockPanel>
+    </Border>
+    
+</Window>

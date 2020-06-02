@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="CV.UserControls.AxisTB"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" 
+             MinHeight="2" MinWidth="6">
+    
+    <StackPanel Name="mainStackPanel_AxisTB" Orientation="Horizontal">
+        <StackPanel.Resources>
+            <Style TargetType="TextBox">
+                <Setter Property="Height" Value="Auto"/>
+                <Setter Property="Width" Value="45"/>
+                <Setter Property="FontSize" Value="15"/>
+            </Style>
+        </StackPanel.Resources>
+        <Button Name="minus_AxisTB" Content="-" Width="20" FontSize="20" Click="Minus_Handler"/>
+        <TextBox Name="tb_AxisTB" TextAlignment="Center" PreviewKeyDown="KeyConfirm_Handler" PreviewTextInput="KeyFilter_Handler" TextChanged="TextValidation_Handler" DataObject.Pasting="PasteValidation_Handler" LostKeyboardFocus="TypeCancel_Handler" Mouse.MouseWheel="HoverWheel_Handler" Mouse.MouseDown="ClickInside_Handler" Mouse.PreviewMouseDownOutsideCapturedElement="ClickOutside_Handler"/>
+        <Button Name="plus_AxisTB" Content="+" Width="20" FontSize="20" Click="Plus_Handler"/>
+    </StackPanel>
+</UserControl>
