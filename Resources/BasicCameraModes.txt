@@ -1,0 +1,645 @@
+using UnityEngine;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+/*Axis System Chosen: Roll(Z or longitudinal axis), Yaw(Y or vertical axis), Pitch(X or horizontal axis)*/
+
+public abstract class CameraMode {
+
+    //Constructor
+    public CameraMode(Camera camera, Transform target, bool collisions = false) {
+        Camera = camera;
+        Target = target;
+        //CameraCollision = new CollisionChecker(Camera.transform, collisions);
+        Init();
+    }
+    
+    public virtual bool Init() {
+        AutoTracking = false;
+        return true;
+    }
+    
+    //Properties
+    public Camera Camera { get; set; }
+    
+    public Transform Target { get; set; }
+    
+    public Vector3 Position {
+        get { return Camera.transform.position; }
+        set { Camera.transform.position = value; }
+    }
+    
+    public Quaternion Rotation {
+        get { return Camera.transform.rotation; }
+        set { Camera.transform.rotation = value; }
+    }
+    
+    public bool AutoTracking { get; set; }
+    
+    //public CollisionChecker CameraCollision { get; set; }
+    
+    //Methods
+    public abstract void InstantUpdate();
+    
+    public abstract void Update();
+
+    public void Tracker(Transform objective) {
+        Camera.transform.LookAt(objective);
+    }
+
+    public void Tracker(Transform objective, Vector3 upAxis) {
+        Camera.transform.LookAt(objective, upAxis);
+    }
+} //end class CameraMode
+
+public class FixedCameraMode : CameraMode {
+    
+    //Constructors
+    public FixedCameraMode(Camera camera, Transform target) : base(camera, target) {
+        FixedAxis = Vector3.up;
+    }
+
+    public FixedCameraMode(Camera camera, Transform target, Vector3 fixedAxis) : base(camera, target) {
+        FixedAxis = fixedAxis;
+    }
+    
+    //Properties
+    public Vector3 FixedAxis { get; set; }
+    
+    //Methods
+    public override void InstantUpdate() {
+        //Fixed camera does nothing on InstantUpdate
+    }
+    
+    public override void Update() {
+        //Fixed camera does nothing on Update
+    }
+    
+    public void SetRotation(float pitch, float yaw, float roll) {
+        Rotation = Quaternion.AngleAxis(roll, Vector3.forward) * Quaternion.AngleAxis(yaw, Vector3.up) * Quaternion.AngleAxis(pitch, Vector3.right);
+    }
+} //end class FixedCameraMode
+
+public class FixedTrackingCameraMode : FixedCameraMode {
+    
+    //Constructor
+    public FixedTrackingCameraMode(Camera camera, Transform target) : base(camera, target) {
+        Init();
+    }
+    
+    public new bool Init() {
+        AutoTracking = true;
+        return true;
+    }
+    
+    //Methods
+    public override void InstantUpdate() {
+        base.InstantUpdate();
+        if (AutoTracking) {
+            Tracker(Target, FixedAxis);
+        }
+    }
+    
+    public override void Update() {
+        InstantUpdate();
+    }
+} //end class FixedTrackingCameraMode
+
+public class ClosestToTargetCameraMode : FixedTrackingCameraMode {
+    
+    //Fields
+    protected float time;
+
+    //Constructor
+    public ClosestToTargetCameraMode(Camera camera, Transform target, float timeInterval = 1.0f) : base(camera, target) {
+        TimeInterval = timeInterval;
+        time = timeInterval;
+        Init();
+    }
+    
+    public new bool Init() {
+        PositionList.Add(new Vector3(5, 5, 5)); //Dummy position
+        return true;
+    }
+    
+    //Properties
+    public List<Vector3> PositionList { get; set; }
+    
+    public float TimeInterval { get; set; }
+    
+    //Methods
+    public override void InstantUpdate() {
+        if (Target != null && PositionList.Count > 0) {
+            double minDistance = Double.MaxValue;
+            Vector3 targetPos = Target.position;
+            Vector3 closestPos = PositionList[0];
+            
+            foreach (Vector3 cameraPos in PositionList) {
+                double distance = Vector3.Distance(cameraPos,targetPos);
+                if (distance < minDistance) {
+                    closestPos = cameraPos;
+                    minDistance = distance;
+                }
+            }
+            Position = closestPos;
+            Tracker(Target, FixedAxis);
+        }
+    }
+    
+    public override void Update() {
+        InstantUpdate();
+        /*time -= Time.deltaTime;
+        if (time < 0) {
+            InstantUpdate();
+            time = TimeInterval;
+        }*/
+    }
+    
+    public void AddCameraPosition(Vector3 pos) {
+        PositionList.Add(pos);
+    }
+    
+    public void RemoveCameraPosition(int pos) {
+        PositionList.RemoveAt(pos);
+    }
+    
+    public void ClearPositionList() { PositionList.Clear(); }
+} //end class ClosestToTargetCameraMode
+
+public class ChaseCameraMode : CameraMode, ITightable {
+    
+    //Fields
+    protected float remainingTime;
+
+    //Constructor
+    public ChaseCameraMode(Camera camera, Transform target, Vector3 relativePosition, float margin = 0.1f) : base(camera, target, true) {
+        FixedAxis = Vector3.up;
+        RelativePosition = relativePosition;
+        Tightness = 0.9f;
+        Init();
+    }
+    
+    public override bool Init() {
+        remainingTime = 0.0f;
+        AutoTracking = true;
+        TightnessEnabled = true;
+        return true;
+    }
+    
+    //Properties
+    public Vector3 FixedAxis { get; set; }
+    
+    public Vector3 RelativePosition { get; set; }
+    
+    public bool TightnessEnabled { get; set; }
+
+    public float Tightness { get; set; }
+
+    //Methods
+    public override void InstantUpdate() {
+        if (Target != null) {
+            Position = Target.position + Target.rotation * RelativePosition;
+        
+            //if (CameraCollision.CollisionsEnabled) Position = CameraCollision.FixCameraPosition(Target);
+            if (AutoTracking) Tracker(Target, FixedAxis);
+        }
+    }
+    
+    public override void Update() {
+        if (Target != null) {
+            if (TightnessEnabled) {
+                Vector3 cameraCurrentPosition = Position;
+                Vector3 cameraFinalPositionNoTightness = Target.position + Target.rotation * RelativePosition;
+                Vector3 diff = (cameraFinalPositionNoTightness - cameraCurrentPosition) * Tightness;
+                Position += diff;
+                //if (CameraCollision.CollisionsEnabled) Position = CameraCollision.FixCameraPosition(Target);
+                if (AutoTracking) Tracker(Target, FixedAxis);
+            }
+            else InstantUpdate();
+            
+            /*else {
+                remainingTime += Time.deltaTime;
+                int steps = (int)(remainingTime / delta);
+                float finalTime = steps * delta;
+                Quaternion cameraCurrentRotation = Camera.transform.rotation;
+                float finalPercentage = finalTime / remainingTime;
+                Vector3 cameraFinalPosition = cameraCurrentPosition + ((cameraFinalPositionNoTightness - cameraCurrentPosition) * finalPercentage);
+                Quaternion cameraFinalRotation = Quaternion.Slerp(cameraCurrentRotation, Target.rotation, finalPercentage);
+                Vector3 cameraIntermediatePosition = cameraCurrentPosition;
+                Quaternion cameraIntermediateRotation = cameraCurrentRotation;
+                
+                for (int i = 0; i < steps; i++) {
+                    float percentage = (i+1) / (float)steps;
+                    Vector3 intermediatePositionNoTightness = cameraCurrentPosition + (cameraFinalPosition - cameraCurrentPosition) * percentage;
+                    Vector3 diff = (intermediatePositionNoTightness - cameraCurrentPosition) * Tightness;
+                    Camera.transform.position += diff;
+                }
+            }*/
+        }
+    }
+    
+} //end class ChaseCameraMode
+
+public class ChaseFreeYawAxisCameraMode : ChaseCameraMode {
+
+    //Constructors
+    public ChaseFreeYawAxisCameraMode(Camera camera, Transform target, Vector3 relativePosition, Vector3 rotationOffset, float collisionMargin) : 
+    base(camera, target, relativePosition, collisionMargin) {
+        RotationOffset = Quaternion.Euler(rotationOffset);
+        Init();
+    }
+    
+    public ChaseFreeYawAxisCameraMode(Camera camera, Transform target, Vector3 relativePosition, float roll, float yaw, float pitch, float collisionMargin = 0.1f) : 
+    base(camera, target, relativePosition, collisionMargin) {
+        RotationOffset = Quaternion.AngleAxis(roll, Vector3.forward) * Quaternion.AngleAxis(yaw, Vector3.up) * Quaternion.AngleAxis(pitch, Vector3.right);
+        Init();
+    }
+    
+    public override bool Init() {
+        AutoTracking = false;
+        return true;
+    }
+    
+    //Properties
+    public Quaternion RotationOffset { get; set; }
+    
+    //Methods
+    public override void InstantUpdate() {
+        if (Target != null) {
+            base.InstantUpdate();
+            Rotation = Target.rotation * RotationOffset;
+        }
+    }
+    
+    public override void Update() {
+        base.Update();
+        Rotation = Target.rotation * RotationOffset;
+    }
+    
+    public void SetRelativePosition(Vector3 relativePosition, float roll, float yaw, float pitch) {
+        RelativePosition = relativePosition;
+        RotationOffset = Quaternion.AngleAxis(roll, Vector3.forward) * Quaternion.AngleAxis(yaw, Vector3.up) * Quaternion.AngleAxis(pitch, Vector3.right);
+    }
+} //end class ChaseFreeYawAxisCameraMode
+
+public class AttachedCameraMode : CameraMode {
+    
+    //Constructors
+    public AttachedCameraMode(Camera camera, Transform target, Vector3 relativePosition, Vector3 rotation) : base(camera, target, false) {
+        RelativePosition = relativePosition;
+        RelativeRotation = Quaternion.Euler(rotation);
+        Init();
+    }
+    
+    public AttachedCameraMode(Camera camera, Transform target, Vector3 relativePosition, float roll, float yaw, float pitch) : base(camera, target, false) {
+        RelativePosition = relativePosition;
+        RelativeRotation = Quaternion.AngleAxis(roll, Vector3.forward) * Quaternion.AngleAxis(yaw, Vector3.up) * Quaternion.AngleAxis(pitch, Vector3.right);
+        Init();
+    }
+    
+    public override bool Init(){
+        Camera.transform.SetParent(Target);
+        return true;
+    }
+    
+    //Properties
+    public Vector3 RelativePosition { get; set; }
+    
+    public Quaternion RelativeRotation { get; set; }
+    
+    //Methods
+    public override void InstantUpdate() {
+        Position = Target.position + RelativePosition;
+        Rotation = Target.rotation * RelativeRotation;
+    }
+    
+    public override void Update() {
+        InstantUpdate();
+    }
+    
+    public void Detach() { Camera.transform.parent = null; }
+} //end class AttachedCameraMode
+
+public class FirstPersonCameraMode : AttachedCameraMode {
+    
+    //Fields
+    protected bool characterVision;
+    
+    //Constructors
+    public FirstPersonCameraMode(Camera camera, Transform target, Vector3 relativePosition, Vector3 relativeRotation) : 
+    base(camera, target, relativePosition, relativeRotation) {
+        Init();
+    }
+    
+    public FirstPersonCameraMode(Camera cam, Transform target, Vector3 relativePosition, float roll, float yaw, float pitch) : 
+    base(cam, target, relativePosition, roll, yaw, pitch) {
+        Init();
+    }
+    
+    public override bool Init() {
+        CharacterVision = true;
+        return true;
+    }
+    
+    //Properties
+    public bool CharacterVision {
+        get { return characterVision; }
+        set {
+            characterVision = value;
+            if (Camera != null) Camera.enabled = value;
+        }
+    }
+    
+    //Methods
+    public override void InstantUpdate() {
+        Rotation = Target.rotation * RelativeRotation;
+    }
+    
+    public override void Update() {
+        InstantUpdate();
+    }
+    
+    public new void Detach() {
+        base.Detach();
+        Camera.enabled = true;
+    }
+} //end class FirstPersonCameraMode
+
+public class PlaneBindedCameraMode : CameraMode, ITightable {
+    
+    //Constructor
+    public PlaneBindedCameraMode(Camera camera, Transform target, Plane plane) : base(camera, target) {
+        Plane = plane;
+        Tightness = 1.0f;
+        Init();
+    }
+    
+    public override bool Init() {
+        AutoTracking = true;
+        TightnessEnabled = true;
+        return true;
+    }
+    
+    //Properties
+    public Plane Plane { get; set; }
+
+    public bool TightnessEnabled { get; set; }
+
+    public float Tightness { get; set; }
+
+    //Methods
+    public override void InstantUpdate() {
+        Camera.transform.up = Plane.normal.normalized;
+        float distance = Plane.GetDistanceToPoint(Target.position);
+        Position = Target.position + Plane.normal.normalized * distance;
+        Tracker(Target);
+    }
+    
+    public override void Update() {
+        if (TightnessEnabled) {
+            float distance = Plane.GetDistanceToPoint(Target.position);
+            Vector3 cameraCurrentPosition = Position;
+            Vector3 cameraFinalPositionNoTightness = Target.position + Plane.normal.normalized * distance;
+            Vector3 diff = (cameraFinalPositionNoTightness - cameraCurrentPosition) * Tightness;
+            Position += diff;
+            Tracker(Target);
+        }
+        else InstantUpdate();
+    }
+} //end class PlaneBindedCameraMode
+
+public class PlanViewCameraMode : PlaneBindedCameraMode {
+    
+    //Fields
+    protected float zoom;
+    protected float heightDisplacement;
+    
+    //Constructor
+    public PlanViewCameraMode(Camera camera, Transform target, Plane plane, float minZoom, float maxZoom) : base(camera, target, plane) {
+        MaxZoom = maxZoom;
+        MinZoom = minZoom;
+        Init();
+    }
+    
+    public override bool Init() {
+        heightDisplacement = 0.0f;
+        Zoom = 30.0f;
+        MoveFactor = 5.0f;
+        AutoTracking = false;
+        return true;
+    }
+    
+    //Properties
+    public float Zoom {
+        get { return zoom; }
+        set {
+            float desiredDisplacement = value - Zoom;
+            if(value > MaxZoom){
+                heightDisplacement = MaxZoom - Zoom; 
+                Zoom = MaxZoom;
+            }
+            else if (value < MinZoom){
+                heightDisplacement = MinZoom - Zoom;
+                Zoom = MinZoom;
+            }
+            else {
+                heightDisplacement = desiredDisplacement;
+                Zoom = value;
+            }
+        }
+    }
+    
+    public Vector3 HeightAxis { get { return Plane.normal.normalized; } }
+    
+    public float MaxZoom { get; set; }
+    
+    public float MinZoom { get; set; }
+    
+    public float MoveFactor { get; set; }
+    
+    //Methods
+    public override void InstantUpdate() {
+        base.InstantUpdate();
+        Rotation = Quaternion.AngleAxis(90.0f, Camera.transform.rotation * Vector3.right);
+        Position += HeightAxis * heightDisplacement;
+    }
+    
+    public override void Update() {
+        base.Update();
+    }
+    
+    public virtual void ZoomIn(float percentage = 1.0f) {
+        float desiredDisplacement = MoveFactor * percentage;
+        float desiredZoom = Zoom + desiredDisplacement;
+        Zoom = desiredZoom;
+    }
+    
+    public virtual void ZoomOut(float percentage = 1.0f) { ZoomIn(-percentage); }
+} //end class PlanViewCameraMode
+
+public class RTSCameraMode : PlanViewCameraMode {
+    
+    //Fields
+    protected float horizontalDisplacement;
+    protected float verticalDisplacement;
+    protected float pitch;
+    
+    //Constructor
+    public RTSCameraMode(
+        Camera camera,
+        Transform target,
+        Vector3 initialPosition,
+        Vector3 rightAxis,
+        Vector3 upAxis,
+        float pitch = 90.0f /* * Mathf.Deg2Rad*/,
+        float minZoom = 0.0f,
+        float maxZoom = 0.0f
+    ) : base(camera, target, new Plane(Vector3.up, 30.0f), minZoom, maxZoom) {
+        HorizontalAxis = rightAxis.normalized;
+        VerticalAxis = upAxis.normalized;
+        HeightAxis = Vector3.Cross(HorizontalAxis, VerticalAxis).normalized;
+        Pitch = pitch;
+        Position = initialPosition;
+    }
+    
+    public override bool Init() {
+        heightDisplacement = 0.0f;
+        horizontalDisplacement = 0.0f;
+        verticalDisplacement = 0.0f;
+        Pitch = 90.0f;
+        MoveFactor = 10f;
+        return true;
+    }
+    
+    //Properties
+    public new Vector3 HeightAxis { get; set; }
+    
+    public Vector3 HorizontalAxis { get; set; }
+    
+    public Vector3 VerticalAxis { get; set; }
+    
+    public float Pitch { 
+        get { return pitch; }
+        set {
+            pitch = value;
+            Rotation = Quaternion.AngleAxis(Pitch, Camera.transform.right);
+        }
+    }
+    
+    //Methods
+    public override void InstantUpdate() {
+        base.InstantUpdate();
+        Vector3 displacement = VerticalAxis * verticalDisplacement + HeightAxis * heightDisplacement + HorizontalAxis * horizontalDisplacement;
+        Position += displacement;
+        heightDisplacement = 0.0f;
+        horizontalDisplacement = 0.0f;
+        verticalDisplacement = 0.0f;
+    }
+    
+    public override void Update() {
+        Vector3 displacement = (VerticalAxis * verticalDisplacement + HeightAxis * heightDisplacement + HorizontalAxis * horizontalDisplacement) * Time.deltaTime * MoveFactor;
+        Position += displacement;
+        heightDisplacement = 0.0f;
+        horizontalDisplacement = 0.0f;
+        verticalDisplacement = 0.0f;
+    }
+    
+    public virtual void GoRight(float percentage = 1.0f) { horizontalDisplacement += MoveFactor * percentage; }
+    
+    public virtual void GoLeft(float percentage = 1.0f) { GoRight(-percentage); }
+    
+    public virtual void GoUp(float percentage = 1.0f) { verticalDisplacement += MoveFactor * percentage; }
+    
+    public virtual void GoDown(float percentage = 1.0f) { GoUp(-percentage); }
+} //end class RTSCameraMode
+
+public class ThroughTargetCameraMode : CameraMode {
+
+    //Constructor
+    public ThroughTargetCameraMode(Camera camera, Transform target, Transform focus, float margin, Vector3 fixedAxis, bool inverse = false) : base(camera, target) {
+        FixedAxis = fixedAxis;
+        Focus = focus;
+        Margin = margin;
+        Inverse = inverse;
+        Init();
+    }
+    
+    public override bool Init() {
+        AutoTracking = true;
+        return true;
+    }
+    
+    //Properties
+    public Vector3 FixedAxis { get; set; }
+    
+    public Transform Focus { get; set; }
+    
+    public float Margin { get; set; }
+    
+    public bool Inverse { get; set; }
+    
+    //Methods
+    public override void InstantUpdate() {
+        if (Target != null) {
+            if (!Inverse) {
+                Vector3 focusToTarget = Focus.position - Target.position;
+                Position = Target.position - focusToTarget.normalized * Margin;
+                Tracker(Target, FixedAxis);
+            }
+            else {
+                Vector3 focusToTarget = Target.position - Focus.position;
+                Position = Focus.position - focusToTarget.normalized * Margin;
+                Tracker(Focus, FixedAxis);
+            }
+        }
+    }
+    
+    public override void Update() {
+        InstantUpdate();
+    }
+} //end class ThroughTargetCameraMode
+
+public class FixedDirectionCameraMode : CameraMode, ITightable {
+    
+    //Constructor
+    public FixedDirectionCameraMode(Camera camera, Transform target, Vector3 direction, float distance, Vector3 fixedAxis) : base(camera, target) {
+        Direction = direction.normalized;
+        Distance = distance;
+        FixedAxis = fixedAxis;
+        Tightness = 1.0f;
+    }
+    
+    public override bool Init() {
+        AutoTracking = true;
+        TightnessEnabled = true;
+        return true;
+    }
+    
+    //Properties
+    public Vector3 Direction { get; set; }
+    
+    public Vector3 FixedAxis { get; set; }
+    
+    public float Distance { get; set; }
+
+    public bool TightnessEnabled { get; set; }
+
+    public float Tightness { get; set; }
+    
+    //Methods
+    public override void InstantUpdate() {
+        Position = Target.position - Direction * Distance;
+        if (AutoTracking) Tracker(Target, FixedAxis);
+    }
+    
+    public override void Update() {
+        Vector3 currentCameraPos = Position;
+        Vector3 finalCameraPosNoTightness = Target.position - Direction * Distance;
+        if (TightnessEnabled) {
+            Vector3 diff = (finalCameraPosNoTightness - currentCameraPos) * Tightness;
+            Position += diff;
+        }
+        else Position = finalCameraPosNoTightness;
+        if (AutoTracking) Tracker(Target, FixedAxis);
+    }
+} //end class FixedDirectionCameraMode

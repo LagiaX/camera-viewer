@@ -1,0 +1,100 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+public class CameraControlSystem : MonoBehaviour {
+
+    //Fields
+    //protected Vector3 fixedAxis;
+    public Transform target;
+    
+    //Properties
+    public SortedDictionary<string, CameraMode> CameraModes { get; set; }
+    
+    public CameraMode CurrentCameraMode { get; set; }
+    
+    public Camera UnityCamera {
+        get { return GetComponent<Camera>(); }
+    }
+    
+    public Transform Target {
+        get { return target; }
+        set { target = value; }
+    }
+    
+    //Methods
+    public void Start() {
+        CameraModes = new SortedDictionary<string, CameraMode>();
+        //Fill CameraModes dictionary with desired camera modes
+        CameraModes.Add("01.Fixed", new FixedCameraMode(UnityCamera, Target)); //Dummy fixed camera
+        if (CameraModes.Count > 0) {
+            CurrentCameraMode = CameraModes["01.Fixed"];
+        }
+    }
+    
+    public void Update() {
+        //Logic for changing camera mode, adding/removing them, etc...
+        if (Input.GetKeyDown("n")) { //Press 'n' to cycle through the camera modes dictionary
+            CurrentCameraMode = GetNextCameraMode();
+            Debug.Log(GetCameraModeName(CurrentCameraMode));
+            CurrentCameraMode.InstantUpdate();
+        }
+        if (CurrentCameraMode is RTSCameraMode) { //Arrow controls for the RTS camera
+            if (Input.GetKey("up")) { (CurrentCameraMode as RTSCameraMode).GoUp(); }
+            else if (Input.GetKey("down")) { (CurrentCameraMode as RTSCameraMode).GoDown(); }
+            if (Input.GetKey("left")) { (CurrentCameraMode as RTSCameraMode).GoLeft(); }
+            else if (Input.GetKey("right")) { (CurrentCameraMode as RTSCameraMode).GoRight(); }
+        }
+    }
+
+    public void LateUpdate() {
+        //Update calls come here, like 'CurrentCameraMode.Update()'
+        CurrentCameraMode.Update();
+    }
+    
+    public string GetCameraModeName(CameraMode camMode) {
+        SortedDictionary<string, CameraMode>.Enumerator it = CameraModes.GetEnumerator();
+        bool flag = true;
+        while (it.Current.Value != camMode && flag) flag = it.MoveNext();
+        return it.Current.Key;
+    }
+    
+    public CameraMode GetNextCameraMode() {
+        SortedDictionary<string, CameraMode>.Enumerator it = CameraModes.GetEnumerator();
+        bool flag = true;
+
+        while (it.Current.Value != CurrentCameraMode && flag) flag = it.MoveNext();
+
+        if (it.MoveNext()) return it.Current.Value;
+        else {
+            it = CameraModes.GetEnumerator();
+            it.MoveNext();
+            return it.Current.Value;
+        }
+    }
+
+    public void RemoveCameraMode(CameraMode camMode) {
+        if (CurrentCameraMode == camMode) { //If the current mode is removed
+            SortedDictionary<string, CameraMode>.Enumerator it = CameraModes.GetEnumerator();
+            it.MoveNext();
+            CurrentCameraMode = it.Current.Value; //The new current mode will be the FIRST mode in the dictionary
+        }
+        CameraModes.Remove(GetCameraModeName(camMode));
+    }
+
+	//EXPERIMENTAL
+    /*public void AddToIgnoreList(GameObject gameObj) { //Adds argument to the ignore list of every collidable camera
+        foreach (KeyValuePair<string, CameraMode> it in CameraModes) {
+            if (it.Value.CameraCollision.CollisionsEnabled)
+                it.Value.CameraCollision.AddToIgnoreList(gameObj);
+        }
+    }*/
+
+    
+    /*public void RemoveFromIgnoreList(GameObject gameObj) { //Removes argument from the ignore list of every collidable camera
+        foreach (KeyValuePair<string, CameraMode> it in CameraModes) {
+            if (it.Value.CameraCollision.CollisionsEnabled)
+                it.Value.CameraCollision.RemoveFromIgnoreList(gameObj);
+        }
+    }*/
+}

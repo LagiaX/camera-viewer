@@ -1,0 +1,8 @@
+using UnityEngine;
+using System.Collections;
+
+public interface ITightable {
+    
+    bool TightnessEnabled { get; set; }
+    float Tightness { get; set; }
+}
