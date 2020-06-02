@@ -1,0 +1,87 @@
+﻿<cameras:CameraMode x:Class="CV.CameraModes.ThroughTargetCM"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:control="clr-namespace:CV.UserControls"
+      xmlns:cameras="clr-namespace:CV.CameraModes"
+      mc:Ignorable="d" 
+      MinHeight="350" MinWidth="250"
+      Title="ThroughTargetCM_Tab">
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <Border Grid.Row="0" Grid.ColumnSpan="2" CornerRadius="3" Background="LightGray" Padding="5" Margin="8" ToolTip="Through Target Camera" ToolTipService.ShowDuration="2000" ToolTipService.InitialShowDelay="2500">
+            <Grid Name="mainGrid_ThroughTargetCM">
+                <!--Grid.Background>
+            <ImageBrush ImageSource="/Resources/Img/throughTargetBG.png" Stretch="Fill"/>
+        </-->
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                    <!--RowDefinition MinHeight="40" Height="Auto"/-->
+                </Grid.RowDefinitions>
+
+                <!--Border Grid.Row="0" Grid.Column="0" BorderThickness="2" BorderBrush="Gray">
+                    <Label Grid.Row="0" Grid.Column="0" Content="Fixed Axis" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                        <Label.ToolTip>
+                            <ToolTip StaysOpen="True" MaxWidth="300">
+                                <TextBlock TextWrapping="Wrap">
+                        <Run Text="Vertical axis which will serve as reference for Yaw axis rotations of the camera (gravity axis)." />
+                        <LineBreak/>
+                        <Run Text="(Recommended: 0 1 0)"/>
+                                </TextBlock>
+                            </ToolTip>
+                        </Label.ToolTip>
+                    </Label>
+                </>
+                <Border Grid.Row="0" Grid.Column="1" BorderThickness="2" BorderBrush="Gray" Padding="5">
+                    <control:AxisGrid Grid.Row="0" Grid.Column="1" x:Name="fAxis_ThroughTargetCM" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="8,0,0,0" TextBoxBase.TextChanged="YawAxis_Handler"/>
+                </Border-->
+
+                <Label Grid.Row="0" Grid.Column="0" Content="Focus Position" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap">
+                        <Run Text="Position that will be targeted with the camera along with the target model. There will be an invisible line across all three elements:"/>
+                        <LineBreak/>
+                        <Run Text="camera----target model----focus position"/>
+                            </TextBlock>
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+                <control:AxisGrid  Grid.Row="0" Grid.Column="1" x:Name="fPos_ThroughTargetCM" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="8,0,0,0" TextBoxBase.TextChanged="Focus_Handler"/>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="Margin" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap" Text="Distance from the camera to the nearest element (target model or focus position). Basically, a distance to keep a clear view of everything. It won't change unless modified." />
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+                <control:AxisTB Grid.Row="1" Grid.Column="1" x:Name="margin_ThroughTargetCM" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,0,0,0" TextBoxBase.TextChanged="Margin_Handler"/>
+
+                <Label Grid.Row="2" Grid.Column="0" Content="Inverse Control" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap">
+                        <Run Text="If marked, it will position the camera at the other end of the line:"/>
+                        <LineBreak/>
+                        <Run Text="target model----focus position----camera"/>
+                        <LineBreak/>
+                        <Run Text="While unmarked, the camera is positioned normally:"/>
+                        <LineBreak/>
+                        <Run Text="camera----target model----focus position"/>
+                            </TextBlock>
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+                <control:CVCheckBox Grid.Row="2" Grid.Column="1" x:Name="iControl_ThroughTargetCM" IsChecked="False" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="00,0,0,0" Checked="InvToggle_Handler" Unchecked="InvToggle_Handler"/>
+
+            </Grid>
+        </Border>
+    </ScrollViewer>
+</cameras:CameraMode>

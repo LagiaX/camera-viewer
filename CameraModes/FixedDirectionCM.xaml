@@ -1,0 +1,70 @@
+﻿<cameras:CameraMode x:Class="CV.CameraModes.FixedDirectionCM"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:control="clr-namespace:CV.UserControls"
+      xmlns:cameras="clr-namespace:CV.CameraModes"
+      mc:Ignorable="d" 
+      MinHeight="350" MinWidth="250"
+      Title="FixedDirectionCM_Tab">
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <Border Grid.Row="0" Grid.ColumnSpan="2" CornerRadius="3" Background="LightGray" Padding="5" Margin="8" ToolTip="Fixed Direction Camera" ToolTipService.ShowDuration="2000" ToolTipService.InitialShowDelay="2500">
+            <Grid Name="mainGrid_FixedDirectionCM">
+                <!--Grid.Background>
+                <ImageBrush ImageSource="/Resources/Img/fixDirectionBG.png" Stretch="Fill"/>
+            </-->
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                    <!--RowDefinition MinHeight="40" Height="Auto"/-->
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Content="Fixed Direction" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap" Text="Unchanging direction the camera will always be facing. The actual position of the camera can be changed, but not its orientation. Can be understood as a counterpart of the fixed camera, where you can move around the camera with a fixed direction." />
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+                <control:AxisGrid Grid.Row="0" Grid.Column="1" x:Name="fDir_FixedDirectionCM" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="8,0,0,0" TextBoxBase.TextChanged="Direction_Handler"/>
+
+                <!--Label Grid.Row="1" Grid.Column="0" Content="Fixed Axis" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap">
+                        <Run Text="Vertical axis which will serve as reference for Yaw axis rotations of the camera (gravity axis)."/>
+                        <LineBreak/>
+                        <Run Text="(Recommended: 0 1 0)"/>
+                            </TextBlock>
+                        </ToolTip>
+                    </Label.ToolTip>
+                </>
+                <control:AxisGrid Grid.Row="1" Grid.Column="1" x:Name="fAxis_FixedDirectionCM" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="8,0,0,0" TextBoxBase.TextChanged="YawAxis_Handler"/-->
+
+                <Label Grid.Row="1" Grid.Column="0" Content="Distance" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap" Text="Space between the direction the camera is facing. Serves as a kind of zoom functionality. The lower the distance the closer the camera will be to the point used as direction." />
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+                <control:AxisTB Grid.Row="1" Grid.Column="1" x:Name="dist_FixedDirectionCM" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,0,0,0" TextBoxBase.TextChanged="Distance_Handler"/>
+
+                <Label Grid.Row="2" Grid.Column="0" Content="Tightness" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap" Text="Precision with which the camera follows a target model around. 1 means absolute precision and the lower the number, the 'looser' the camera is and the slower it follows the target model." />
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+                <control:TBSlider Grid.Row="2" Grid.Column="1" x:Name="tightness_FixedDirectionCM" HorizontalAlignment="Center" Value="1.0" MinValue="0.1" MaxValue="1.0" Margin="10,0,0,0"/>
+            </Grid>
+        </Border>
+    </ScrollViewer>
+</cameras:CameraMode>

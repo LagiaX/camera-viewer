@@ -1,0 +1,91 @@
+﻿<cameras:CameraMode x:Class="CV.CameraModes.ChaseCM"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:control="clr-namespace:CV.UserControls"
+      xmlns:cameras="clr-namespace:CV.CameraModes"
+      mc:Ignorable="d" 
+      MinHeight="450" MinWidth="250"
+      Title="ChaseCM_Tab">
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <Border Grid.Row="0" Grid.ColumnSpan="2" CornerRadius="3" Background="LightGray" Padding="5" Margin="8" ToolTip="Chase Camera" ToolTipService.ShowDuration="2000" ToolTipService.InitialShowDelay="2500">
+            <Grid Name="mainGrid_ChaseCM">
+                <!--Grid.Background>
+                <ImageBrush ImageSource="/Resources/Img/chaseBG.png" Stretch="Fill"/>
+            </-->
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions >
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!--Chase Camera-->
+                <Label Grid.Row="0" Grid.Column="0" Content="Relative Position" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap" Text="Unchanging position respect to the object attached. Actual camera position in the 3D world is calculated according to the object's position. The axis refer to the local axis of the object; 'X = 5' implies 5 units to the 'right side' of the object (center of the object), 'Y = -2' implies 2 units below the object, and so on."/>
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+                <control:AxisGrid Grid.Row="0" Grid.Column="1" x:Name="rPos_ChaseCM" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="8,0,0,0" TextBoxBase.TextChanged="Position_Handler" />
+
+                <Label Grid.Row="1" Grid.Column="0" Content="Fixed Axis" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap">
+                        <Run Text="Vertical axis which will serve as reference for Yaw axis rotations of the camera (gravity axis)."/>
+                        <LineBreak/>
+                        <Run Text="(Recommended: 0 1 0)"/>
+                            </TextBlock>
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+                <control:AxisGrid Grid.Row="1" Grid.Column="1" x:Name="fixedAxis_ChaseCM" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,0,0,0" TextBoxBase.TextChanged="SetYawAxis_Handler" />
+
+                <!--Label Grid.Row="2" Grid.Column="0" Content="Fixed Step" VerticalAlignment="Center"/>
+        <control:CVCheckBox Grid.Row="2" Grid.Column="1" x:Name="fStep_ChaseCM" VerticalAlignment="Center" Margin="10,0,0,0" IsChecked="False"/>
+        
+        <Label Grid.Row="3" Grid.Column="0" Content="Delta Value" VerticalAlignment="Center"/>
+        <control:AxisTB Grid.Row="3" Grid.Column="1" x:Name="deltaV_ChaseCM" HorizontalAlignment="left" Margin="10,0,0,0"/>
+        
+        <Label Grid.Row="4" Grid.Column="0" Content="Remaining Time" VerticalAlignment="Center"/>
+        <control:AxisTB Grid.Row="4" Grid.Column="1" x:Name="rTime_ChaseCM"  HorizontalAlignment="left" Margin="10,0,0,0"/-->
+
+                <Label Grid.Row="2" Grid.Column="0" Content="Tightness" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap" Text="Precision with which the camera follows a target model around. 1 means absolute precision and the lower the number, the 'looser' the camera is and the slower it follows the target model."/>
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+                <control:TBSlider Grid.Row="2" Grid.Column="1" x:Name="tightness_ChaseCM" MaxValue="1" MinValue="0.1" Value="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,0,0,0"/>
+
+                <!--Chase Free Yaw Axis Camera-->
+                <Label Grid.Row="3" Grid.Column="0" Content="Free Yaw Axis" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap" Text="If marked, the camera will be assigned a new vertical axis (gravity axis) as its Yaw axis. This will allow for a degree of freedom when facing left and right."/>
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+                <control:CVCheckBox Grid.Row="3" Grid.Column="1" x:Name="freeAxis_ChaseCM" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="00,0,0,0" Checked="FreeAxisChecked_Handler" Unchecked="FreeAxisUnchecked_Handler"/>
+
+                <Label Grid.Row="4" Grid.Column="0" Content="Rotation Offset" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap" Text="Similar to relative rotation, a rotation offset is applied to the camera respect to the target model. Actual rotation applied to the camera is calculated according to the object's rotation and actual camera position. The axis refer to the local axis of the object; 'X = 30' implies 30 degrees around the pitch axis taking the local XYZ-axis of the object as neutral position."/>
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+                <control:AxisGrid Grid.Row="4" Grid.Column="1" x:Name="rOffset_ChaseCM" IsAngleRotation="True" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="8,0,0,0" IsEnabled="False" TextBoxBase.TextChanged="Rotation_Handler"/>
+            </Grid>
+        </Border>
+    </ScrollViewer>
+</cameras:CameraMode>

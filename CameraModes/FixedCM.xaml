@@ -1,0 +1,93 @@
+﻿<cameras:CameraMode x:Class="CV.CameraModes.FixedCM"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:control ="clr-namespace:CV.UserControls"
+      xmlns:cameras="clr-namespace:CV.CameraModes"
+      mc:Ignorable="d" 
+      MinHeight="450" MinWidth="250">
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <Border Grid.Row="0" Grid.ColumnSpan="2" CornerRadius="3" Background="LightGray" Padding="5" Margin="8" ToolTip="Fixed Camera" ToolTipService.ShowDuration="2000" ToolTipService.InitialShowDelay="2500">
+            <Grid Name="mainGrid_FixedCM">
+                <!--Grid.Background>
+                <ImageBrush ImageSource="/Resources/Img/fixedBG.png" Stretch="Fill"/>
+                </-->
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                    <RowDefinition MinHeight="40" Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!--Fixed Camera-->
+                <Label Grid.Row="0" Grid.Column="0" Content="Fixed Position" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap" Text="Unchanging position the camera is placed at. The reference system for the world axis is right-handed, meaning that, looking from a neutral position, 'X' grows to the right, 'Y' grows upwards and 'Z' grows leaving our monitor screen." />
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <control:AxisGrid Grid.Row="0" Grid.Column="1" x:Name="fixedPos_FixedCM" VerticalAlignment="Center" Margin="8,0,0,0" TextBoxBase.TextChanged="Position_Handler"/>
+                    <Button Grid.Row="0" Grid.Column="1" Name="addPositionButton_FixedCM" Content="Add" MinWidth="100" VerticalAlignment="Bottom" Margin="12,0,0,0" Click="AddPosition_Handler">
+                        <Button.ToolTip>
+                            <TextBlock TextWrapping="Wrap" Text="Inserts the selected position in the 'position list'."/>
+                        </Button.ToolTip>
+                    </Button>
+                </StackPanel>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="Fixed Rotation" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap" Text="Unchanging rotation applied to the camera. All three axes rotations (pitch, yaw and roll; namely, 'X', 'Y' and 'Z') are applied respect to the camera itself."/>
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+                <control:AxisGrid Grid.Row="1" Grid.Column="1" x:Name="fixedRot_FixedCM" IsAngleRotation="True" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="8,0,0,0" TextBoxBase.TextChanged="Rotation_Handler"/>
+
+                <!--Fixed Tracking Camera-->
+                <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.Content>
+                        <TextBlock Width="120" TextWrapping="Wrap">
+                        Auto Track Target
+                        </TextBlock>
+                    </Label.Content>
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap" Text="If marked, the camera will track the target model on each frame, meaning it will face at the direction of the position of the target model each time the screen is refreshed."/>
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+                <control:CVCheckBox Grid.Row="2" Grid.Column="1" x:Name="autoTracking_FixedCM" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="00,0,0,0" Checked="AutoTracking_Handler" Unchecked="AutoTracking_Handler"/>
+
+                <!--Closest To Target Camera-->
+                <Label Grid.Row="3" Grid.Column="0" Content="Closest Camera" VerticalAlignment="Center" ToolTipService.ShowDuration="60000">
+                    <Label.ToolTip>
+                        <ToolTip StaysOpen="True" MaxWidth="300">
+                            <TextBlock TextWrapping="Wrap" Text="If marked, the camera will position itself at the closest position (Euclidean distance), listed in the 'position list', to the target model, automatically. It checks for the closest position on each frame."/>
+                        </ToolTip>
+                    </Label.ToolTip>
+                </Label>
+                <control:CVCheckBox Grid.Row="3" Grid.Column="1" x:Name="closestCamera_FixedCM" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="00,0,0,0" Checked="ClosestCamChecked_Handler" Unchecked="ClosestCamUnchecked_Handler"/>
+
+                <Label Grid.Row="4" Grid.Column="0" Content="Position List" VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <control:CVComboBox Grid.Row="4" Grid.Column="1" x:Name="posList_FixedCM" VerticalAlignment="Center" HorizontalAlignment="Left" Width="193" Margin="10,0,0,0" ItemsSource="{Binding UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Grid.Row="4" Grid.Column="1" Content="Delete" MinWidth="100" VerticalAlignment="Center" Margin="12,0,0,0" Click="DeletePosition_Handler">
+                        <Button.ToolTip>
+                            <TextBlock TextWrapping="Wrap" Text="Removes the selected position from the 'position list'."/>
+                        </Button.ToolTip>
+                    </Button>
+                </StackPanel>
+
+            </Grid>
+        </Border>
+    </ScrollViewer>
+</cameras:CameraMode>
